@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Practice facial expressions</title>
+  <style>
+  body {color: antiquewhite; background-color: black;}
+  html *
+  {
+    font-size: 1em;
+    font-family: sans-serif;
+  }
+  </style>
+</head>
+<body>
+  <center>
+  <h1 style="font-family: sans-serif; font-size:2.5em">Practice facial expressions acting with AI.</h1>
+  <p>Capture your face with the target emotion to score points. To start over reload the page.</p>
+  <table>
+    <tr>
+      <td><center><div id="target_emotion_holder"></div></center></td>
+      <td><center><div id="score_holder"></div></center></td></tr>
+    <tr>
+      <td><video id="player" width=400 height=400 autoplay></video></td>
+      <td><canvas id="canvas" width=400 height=400></canvas></td>
+    </tr>
+  </table>
+
+  <div id="error"></div>
+  <br>
+  <button id="capture" style="height:60px; width:200px; font-size: 1.5em;" ><b>CAPTURE</b>📸</button>
+  </center>
+</body>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
+<script>
+  $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+</script>
+
+<script>
+  var total_score_val = 0;
+function target_emotion_generateandupdate(){
+  emotions = {1: 'Angry', 2: 'Fear', 3: 'Happy', 4: 'Sad', 5: 'Surprise', 6: 'Neutral'};
+  var target_emotion = Math.floor(1+(Math.random() * 6));
+  $('#target_emotion_holder').html('<b>Target Emotion:'+emotions[target_emotion]+'</b>');
+  return emotions[target_emotion]
+}
+function gamecheck(pred_emotion,target_emotion,score_val){
+  if(pred_emotion != 'Try again'){
+  if (pred_emotion === target_emotion){
+    total_score_val = total_score_val+score_val;
+    $('#score_holder').html('<b>Score: '+total_score_val+'</b>');
+  }else{
+    total_score_val = total_score_val - score_val/2;
+    $('#score_holder').html('<b>Score: '+total_score_val+'</b>');
+  }}
+}
+var t_emotion = target_emotion_generateandupdate();
+$('#target_emotion_holder').html('<b>Target Emotion:'+t_emotion+'</b>');
+$('#score_holder').html('<b>Score: 0</b>');
+
+  const player = document.getElementById('player');
+  const canvas = document.getElementById('canvas');
+  const context = canvas.getContext('2d');
+  const captureButton = document.getElementById('capture');
+
+  const constraints = {
+    video: { width: {max: 400},
+    height: {max: 400},
+    aspectRatio: {ideal: 1}}
+  };
+
+captureButton.addEventListener('click', () => {
+
+// Draw the video frame to the canvas.
+context.drawImage(player, 0, 0, canvas.width, canvas.height);
+var dataURL = canvas.toDataURL();
+
+$.ajax({
+  type: "POST",
+  url: $SCRIPT_ROOT + '/get_image',
+  data:{
+    imgURL: dataURL
+	},
+  success: function(data){
+    $('#error').html('');
+    var result_img = new Image();
+    result_img.src = 'data:image/png;base64,'+data['img'];
+    result_img.onload = function(){
+    context.drawImage(this, 0, 0, canvas.width, canvas.height);
+      }
+    gamecheck(data['pred_emotion'],t_emotion,parseInt(data['score_val']));
+    t_emotion = target_emotion_generateandupdate();
+    },
+  error: function(){ 
+    $('#error').html('<b>Error try reloading page</b>');
+    }
+	})
+});
+
+  // Attach the video stream to the video element and autoplay.
+  navigator.mediaDevices.getUserMedia(constraints)
+    .then((stream) => {
+      player.srcObject = stream;
+    });
+</script>
+</html>
