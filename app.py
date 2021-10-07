@@ -9,8 +9,8 @@ from tensorflow.keras.preprocessing import image
 
 app = Flask(__name__,template_folder='templates')
 
-model = model_from_json(open("fmm_model.json", "r").read())
-model.load_weights('fmm_model_weights.h5')
+model = model_from_json(open("fer_model.json", "r").read())
+model.load_weights('fer_model_weights.h5')
 
 emotions = {0: 'Angry', 1: 'Disgust', 2: 'Fear', 3: 'Happy', 4: 'Sad', 5: 'Surprise', 6: 'Neutral'}
 
@@ -34,7 +34,8 @@ def get_image():
     prediction = []
     faces_detected = face_haar_cascade.detectMultiScale(gray_img, 1.32, 5)
     for (x,y,w,h) in faces_detected:
-            cv2.rectangle(gray_img,(x,y),(x+w,y+h),(255,255,255),thickness=2)    
+            cv2.rectangle(img,(x,y),(x+w,y+h),(0,0,0),thickness=5)
+            cv2.rectangle(img,(x,y),(x+w,y+h),(215, 235, 250),thickness=2)
             roi_gray=gray_img[y:y+w,x:x+h]  #cropping face area from  image  
             roi_gray=cv2.resize(roi_gray,(48,48)) 
             img_pixels = image.img_to_array(roi_gray)  
@@ -52,8 +53,10 @@ def get_image():
         score_val = 0
         text_pos = (100,100)
 
-    cv2.putText(gray_img, pred_emotion_on_img, text_pos, cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
-    pil_result=Image.fromarray(gray_img)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    cv2.putText(img, pred_emotion_on_img, text_pos, cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,0), 5)
+    cv2.putText(img, pred_emotion_on_img, text_pos, cv2.FONT_HERSHEY_SIMPLEX, 1,(250, 235, 215), 2)
+    pil_result=Image.fromarray(img)
     buffered = io.BytesIO()
     pil_result.save(buffered, format="PNG")
     send_img = base64.b64encode(buffered.getvalue()).decode()

@@ -3,19 +3,28 @@
 <head>
   <title>Practice facial expressions</title>
   <style>
-  body {color: antiquewhite; background-color: black;}
-  html *
-  {
+  body{
+	  color: antiquewhite; 
+	  background-color: black;
+	  }
+  html * {
     font-size: 1em;
     font-family: sans-serif;
-  }
+  	}
+  #footer{
+	  margin-top: 3em;
+	  }
+  a:link, a:visited {
+  color: antiquewhite;
+	}
   </style>
 </head>
 <body>
   <center>
-  <h1 style="font-family: sans-serif; font-size:2.5em">Practice facial expressions acting with AI.</h1>
-  <p>Capture your face with the target emotion to score points. To start over reload the page.</p>
-  <table>
+  <h1 style="font-family: sans-serif; font-size:1.5em">Practice facial expressions acting with AI.</h1>
+  <p>Capture the straight front view of your face expressing the target emotion to score points.<br>
+	  The model will detect the emotion and give a confidence score. Reload the page to reset total score.<br></p>
+  <table style="font-size: 30px;">
     <tr>
       <td><center><div id="target_emotion_holder"></div></center></td>
       <td><center><div id="score_holder"></div></center></td></tr>
@@ -25,9 +34,9 @@
     </tr>
   </table>
 
-  <div id="error"></div>
-  <br>
-  <button id="capture" style="height:60px; width:200px; font-size: 1.5em;" ><b>CAPTURE</b>📸</button>
+  <div id="error"></div><br>
+  <button id="capture" style="height:50px; width:200px; font-size: 1.5em;" ><b>Capture</b>📸</button><br>
+  <div id="footer"><a href="https://github.com/atulsnjena/practice_facial_expressions"><b>Github Link</b></a></div>
   </center>
 </body>
 
@@ -42,22 +51,21 @@
 function target_emotion_generateandupdate(){
   emotions = {1: 'Angry', 2: 'Fear', 3: 'Happy', 4: 'Sad', 5: 'Surprise', 6: 'Neutral'};
   var target_emotion = Math.floor(1+(Math.random() * 6));
-  $('#target_emotion_holder').html('<b>Target Emotion:'+emotions[target_emotion]+'</b>');
+  $('#target_emotion_holder').html('<b>Show your '+ emotions[target_emotion] +' face</b>');
   return emotions[target_emotion]
 }
 function gamecheck(pred_emotion,target_emotion,score_val){
   if(pred_emotion != 'Try again'){
   if (pred_emotion === target_emotion){
     total_score_val = total_score_val+score_val;
-    $('#score_holder').html('<b>Score: '+total_score_val+'</b>');
+    $('#score_holder').html('<b>Your total score is '+total_score_val+'</b>');
   }else{
     total_score_val = total_score_val - score_val/2;
-    $('#score_holder').html('<b>Score: '+total_score_val+'</b>');
+    $('#score_holder').html('<b>Your total score is '+total_score_val+'</b>');
   }}
 }
 var t_emotion = target_emotion_generateandupdate();
-$('#target_emotion_holder').html('<b>Target Emotion:'+t_emotion+'</b>');
-$('#score_holder').html('<b>Score: 0</b>');
+$('#score_holder').html('<b>Your total score is 0</b>');
 
   const player = document.getElementById('player');
   const canvas = document.getElementById('canvas');
